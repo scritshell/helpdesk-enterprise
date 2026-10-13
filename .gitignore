@@ -1,25 +1,21 @@
-cat > .gitignore <<'EOF'
-# Environment variables and secrets
+# Java / Maven
+backend/target/
+*.class
+
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Local configuration
 .env
 .env.*
 !.env.example
 
-# Java / Maven
-**/target/
-
-# Angular / Node.js
-**/node_modules/
-**/dist/
-**/.angular/
-
-# Python
-output/
-__pycache__/
-*.pyc
-.venv/
-venv/
-*.spec
-
-# IDE
-.idea/
-EOF
+# OS
+.DS_Store

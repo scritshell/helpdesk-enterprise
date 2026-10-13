@@ -1,6 +1,6 @@
 # HelpDesk empresarial
 
-Aplicación de gestión de incidencias para portfolio.
+Aplicación de gestión de incidencias para portfolio, construida como **monolito modular**.
 
 ## Stack
 
@@ -41,6 +41,12 @@ helpdesk-enterprise/
 └── .github/workflows/ci.yml
 ```
 
-## Nota
+## Principios
 
-Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones.
+1. **Monolito modular antes que microservicios**: despliegue sencillo y límites internos explícitos.
+2. **Package-by-feature**: cada módulo agrupa controlador, aplicación, dominio e infraestructura.
+3. **Seguridad desde el inicio**: los endpoints nacen con una política de acceso definida.
+4. **Auditoría como requisito funcional**: los cambios relevantes generan historial.
+5. **Configuración por entorno**: secretos fuera del código y perfiles separados.
+
+Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones y [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway.
