@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: helpdesk-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/helpdesk}
+    username: ${SPRING_DATASOURCE_USERNAME:helpdesk}
+    password: ${SPRING_DATASOURCE_PASSWORD:helpdesk_dev}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+server:
+  port: 8080
