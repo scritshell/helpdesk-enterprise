@@ -11,7 +11,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:16
         env:
           POSTGRES_DB: helpdesk
           POSTGRES_USER: helpdesk
@@ -20,14 +20,13 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U helpdesk -d helpdesk"
-          --health-interval 5s
+          --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 5
 
-    env:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/helpdesk
-      SPRING_DATASOURCE_USERNAME: helpdesk
-      SPRING_DATASOURCE_PASSWORD: helpdesk_dev
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - uses: actions/checkout@v4
@@ -39,10 +38,13 @@ jobs:
           cache: maven
 
       - run: mvn -B verify
-        working-directory: backend
 
   frontend:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +56,4 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
-        working-directory: frontend
-
       - run: npm run build
-        working-directory: frontend
