@@ -1,6 +1,9 @@
 package com.portfolio.helpdesk.ticket.domain;
 
 import java.time.Instant;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.portfolio.helpdesk.auth.domain.UserAccount;
 import com.portfolio.helpdesk.category.domain.Category;
@@ -22,6 +25,13 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "tickets")
 public class Ticket {
+    private static final Map<TicketStatus, Set<TicketStatus>> ALLOWED_TRANSITIONS = Map.of(
+        TicketStatus.OPEN, EnumSet.of(TicketStatus.IN_PROGRESS),
+        TicketStatus.IN_PROGRESS, EnumSet.of(TicketStatus.WAITING_USER, TicketStatus.RESOLVED),
+        TicketStatus.WAITING_USER, EnumSet.of(TicketStatus.IN_PROGRESS),
+        TicketStatus.RESOLVED, EnumSet.of(TicketStatus.CLOSED, TicketStatus.IN_PROGRESS),
+        TicketStatus.CLOSED, EnumSet.noneOf(TicketStatus.class)
+    );
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -77,7 +87,15 @@ public class Ticket {
     @PreUpdate
     void onUpdate() { updatedAt = Instant.now(); }
 
-    public void changeStatus(TicketStatus status) { this.status = status; }
+    public void changeStatus(TicketStatus status) {
+        if (status == null || status == this.status) {
+            throw new IllegalStateException("El nuevo estado debe ser diferente del estado actual");
+        }
+        if (!ALLOWED_TRANSITIONS.get(this.status).contains(status)) {
+            throw new IllegalStateException("Transición no permitida: " + this.status + " -> " + status);
+        }
+        this.status = status;
+    }
     public void changePriority(TicketPriority priority) { this.priority = priority; }
     public void assignTo(UserAccount technician) { this.technician = technician; }
 

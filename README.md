@@ -49,4 +49,4 @@ helpdesk-enterprise/
 4. **Auditoría como requisito funcional**: los cambios relevantes generan historial.
 5. **Configuración por entorno**: secretos fuera del código y perfiles separados.
 
-Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones, [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway, y [docs/phase3-tickets.md](docs/phase3-tickets.md) para categorías y tickets.
+Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones, [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway, [docs/phase3-tickets.md](docs/phase3-tickets.md) para categorías y tickets, y [docs/phase4-comments-audit-tests.md](docs/phase4-comments-audit-tests.md) para comentarios, auditoría y pruebas.

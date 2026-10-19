@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.portfolio.helpdesk.ticket.api.TicketDtos.AddCommentRequest;
 import com.portfolio.helpdesk.ticket.api.TicketDtos.AssignTicketRequest;
 import com.portfolio.helpdesk.ticket.api.TicketDtos.ChangePriorityRequest;
 import com.portfolio.helpdesk.ticket.api.TicketDtos.ChangeStatusRequest;
+import com.portfolio.helpdesk.ticket.api.TicketDtos.CommentResponse;
 import com.portfolio.helpdesk.ticket.api.TicketDtos.CreateTicketRequest;
+import com.portfolio.helpdesk.ticket.api.TicketDtos.HistoryResponse;
 import com.portfolio.helpdesk.ticket.api.TicketDtos.TicketResponse;
 import com.portfolio.helpdesk.ticket.application.TicketService;
 
@@ -62,5 +65,21 @@ public class TicketController {
     @PatchMapping("/{id}/assignment")
     public TicketResponse assign(@PathVariable Long id, @Valid @RequestBody AssignTicketRequest request, Authentication authentication) {
         return ticketService.assign(id, request, authentication);
+    }
+
+    @PostMapping("/{id}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponse addComment(@PathVariable Long id, @Valid @RequestBody AddCommentRequest request, Authentication authentication) {
+        return ticketService.addComment(id, request, authentication);
+    }
+
+    @GetMapping("/{id}/comments")
+    public List<CommentResponse> comments(@PathVariable Long id, Authentication authentication) {
+        return ticketService.comments(id, authentication);
+    }
+
+    @GetMapping("/{id}/history")
+    public List<HistoryResponse> history(@PathVariable Long id, Authentication authentication) {
+        return ticketService.history(id, authentication);
     }
 }
