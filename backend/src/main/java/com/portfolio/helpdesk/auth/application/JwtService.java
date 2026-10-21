@@ -15,6 +15,7 @@ import com.portfolio.helpdesk.auth.domain.UserAccount;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 
 @Service
@@ -28,6 +29,9 @@ public class JwtService {
     ) {
         if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
             throw new IllegalArgumentException("JWT secret debe tener al menos 32 bytes");
+        }
+        if (expirationMinutes <= 0) {
+            throw new IllegalArgumentException("JWT expiration debe ser mayor que cero minutos");
         }
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMinutes = expirationMinutes;
@@ -55,10 +59,14 @@ public class JwtService {
     }
 
     private Claims parseClaims(String token) {
-        return Jwts.parser()
+        Claims claims = Jwts.parser()
             .verifyWith(signingKey)
             .build()
             .parseSignedClaims(token)
             .getPayload();
+        if (claims.getSubject() == null || claims.getSubject().isBlank() || claims.getExpiration() == null) {
+            throw new MalformedJwtException("JWT requiere subject y expiration");
+        }
+        return claims;
     }
 }

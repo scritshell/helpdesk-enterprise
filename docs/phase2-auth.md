@@ -45,7 +45,7 @@ Flyway crea la tabla `flyway_schema_history` y registra qué migraciones ya se e
 
 ## Usuarios de desarrollo
 
-Con `APP_SEED_ENABLED=true` —valor por defecto local— se crean estos usuarios si no existen:
+Con `APP_SEED_ENABLED=true` —habilítalo solo en tu `.env` local— se crean estos usuarios si no existen. La configuración de aplicación y Compose usa `false` por defecto; `.env.example` lo activa únicamente para facilitar el desarrollo local:
 
 | Email | Contraseña | Rol |
 |---|---|---|
@@ -55,19 +55,22 @@ Con `APP_SEED_ENABLED=true` —valor por defecto local— se crean estos usuario
 
 Las contraseñas se cifran con BCrypt antes de guardarse. Estas credenciales son solo para desarrollo y no deben utilizarse en producción.
 
-Para desactivar la creación automática:
-
-```bash
-APP_SEED_ENABLED=false sudo -E docker compose up -d --build
-```
+Para desactivar la creación automática, establece `APP_SEED_ENABLED=false` en `.env` y reconstruye los servicios. Desactivar el seed impide crear cuentas nuevas; no elimina usuarios demo que ya existan en una base de datos persistente.
 
 ## Arranque en CachyOS
 
-Desde el directorio del proyecto:
+Desde el directorio del proyecto, prepara `.env` y un secreto JWT aleatorio:
+
+```bash
+test -f .env || cp .env.example .env
+openssl rand -hex 32
+```
+
+Copia la salida generada en `JWT_SECRET` dentro de `.env`. Mantén ese archivo fuera de Git. Después ejecuta:
 
 ```bash
 cd /home/scritshell/Documentos/GitHub/helpdesk-enterprise
-sudo docker compose up -d --build
+docker compose up -d --build
 ```
 
 Si se está usando un volumen anterior y quieres probar la migración desde cero:
@@ -159,19 +162,13 @@ BCrypt.matches(contraseñaIntroducida, hashGuardado)
 
 El backend no guarda una sesión HTTP tradicional. Cada petición protegida lleva su token y el servidor valida su firma.
 
-Esto simplifica el despliegue del backend y encaja bien con una API REST. El token tiene una expiración de 120 minutos por defecto, configurable con:
+Esto simplifica el despliegue del backend y encaja bien con una API REST. El token tiene una expiración de 30 minutos por defecto, configurable con:
 
 ```text
 JWT_EXPIRATION_MINUTES
 ```
 
-El secreto se configura con:
-
-```text
-JWT_SECRET
-```
-
-En producción debe ser un secreto largo, aleatorio y gestionado fuera del repositorio.
+El secreto `JWT_SECRET` es obligatorio y no tiene valor predeterminado. La aplicación rechaza secretos de menos de 32 bytes. Genera uno aleatorio para tu entorno; en producción debe gestionarse fuera del repositorio mediante configuración o un gestor de secretos.
 
 ## Decisiones importantes
 
@@ -181,4 +178,4 @@ En producción debe ser un secreto largo, aleatorio y gestionado fuera del repos
 - `ddl-auto` cambió de `update` a `validate`.
 - Flyway es la única herramienta que crea y modifica el esquema.
 - Los usuarios de desarrollo se insertan desde Java para poder generar BCrypt correctamente.
-- Los datos de desarrollo se pueden desactivar con `APP_SEED_ENABLED=false`.
+- Las cuentas demo están desactivadas por defecto; usa `APP_SEED_ENABLED=true` solo en desarrollo local y establécelo en `false` en cualquier entorno publicado.
