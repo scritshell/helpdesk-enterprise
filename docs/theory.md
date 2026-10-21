@@ -592,7 +592,9 @@ mvn verify
    ↓
 Configurar Node 22
    ↓
-npm install
+npm ci
+   ↓
+npm test
    ↓
 npm run build
 ```

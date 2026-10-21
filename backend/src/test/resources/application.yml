@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/helpdesk}
+    username: ${SPRING_DATASOURCE_USERNAME:helpdesk}
+    password: ${SPRING_DATASOURCE_PASSWORD:helpdesk_dev}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+
+app:
+  jwt:
+    secret: "test-only-secret-never-use-outside-tests-0123456789"
+    expiration-minutes: 30
+  seed:
+    enabled: false

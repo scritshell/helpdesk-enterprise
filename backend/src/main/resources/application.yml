@@ -14,11 +14,13 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
 app:
+  cors:
+    allowed-origin: ${APP_CORS_ALLOWED_ORIGIN:http://localhost:4200}
   jwt:
-    secret: ${JWT_SECRET:dev-only-secret-key-change-this-to-at-least-32-characters}
-    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:30}
   seed:
-    enabled: ${APP_SEED_ENABLED:true}
+    enabled: ${APP_SEED_ENABLED:false}
 management:
   endpoints:
     web:

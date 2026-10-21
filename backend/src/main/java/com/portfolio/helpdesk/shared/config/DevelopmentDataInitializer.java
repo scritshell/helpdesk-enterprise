@@ -13,7 +13,7 @@ import com.portfolio.helpdesk.auth.infrastructure.RoleRepository;
 import com.portfolio.helpdesk.auth.infrastructure.UserAccountRepository;
 
 @Configuration
-@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true", matchIfMissing = false)
 public class DevelopmentDataInitializer {
     @Bean
     CommandLineRunner seedDevelopmentUsers(

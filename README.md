@@ -18,17 +18,28 @@ Aplicación de gestión de incidencias para portfolio, construida como **monolit
 
 ### Desarrollo con Docker
 
-```bash
-docker compose up --build
-```
+1. Crea un archivo local de entorno y genera un secreto JWT aleatorio:
 
-Servicios previstos:
+   ```bash
+   cp .env.example .env
+   openssl rand -hex 32
+   ```
 
-- Backend: `http://localhost:8080`
+2. Copia la salida del segundo comando en `JWT_SECRET` dentro de `.env`.
+3. Para desarrollo local, `.env.example` activa explícitamente las cuentas demo (`APP_SEED_ENABLED=true`). Mantén esta opción en `false` en cualquier entorno publicado.
+4. Arranca los servicios:
+
+   ```bash
+   docker compose up --build
+   ```
+
+Servicios locales:
+
 - Frontend: `http://localhost:4200`
-- PostgreSQL: `localhost:5432`
+- Backend: `http://localhost:8080`
+- PostgreSQL: `localhost:5432` (vinculado a loopback para no exponerlo directamente a la red).
 
-> En esta primera base, el backend expone un endpoint de salud. Las funcionalidades de tickets se implementarán por iteraciones.
+El backend falla al arrancar si no se proporciona `JWT_SECRET`. El secreto debe ser aleatorio y tener al menos 32 bytes; la expiración predeterminada del JWT es de 30 minutos. No reutilices el `.env` de desarrollo en producción.
 
 ## Estructura
 
@@ -49,4 +60,4 @@ helpdesk-enterprise/
 4. **Auditoría como requisito funcional**: los cambios relevantes generan historial.
 5. **Configuración por entorno**: secretos fuera del código y perfiles separados.
 
-Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones, [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway, [docs/phase3-tickets.md](docs/phase3-tickets.md) para categorías y tickets, y [docs/phase4-comments-audit-tests.md](docs/phase4-comments-audit-tests.md) para comentarios, auditoría y pruebas.
+Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones, [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway, [docs/phase3-tickets.md](docs/phase3-tickets.md) para categorías y tickets, [docs/phase4-comments-audit-tests.md](docs/phase4-comments-audit-tests.md) para comentarios, auditoría y pruebas, y [docs/phase5-frontend-auth.md](docs/phase5-frontend-auth.md) para el login Angular y la gestión de sesión, además de [docs/phase5-security-hardening.md](docs/phase5-security-hardening.md) para los controles de seguridad de autenticación.
