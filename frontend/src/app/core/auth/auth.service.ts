@@ -53,6 +53,10 @@ export class AuthService {
     return this.userState()?.roles.includes(role) ?? false;
   }
 
+  hasAnyRole(roles: RoleName[]): boolean {
+    return roles.some(role => this.hasRole(role));
+  }
+
   private storeSession(response: LoginResponse): void {
     sessionStorage.setItem(SESSION_TOKEN_KEY, response.token);
     this.storeUser(response.user);

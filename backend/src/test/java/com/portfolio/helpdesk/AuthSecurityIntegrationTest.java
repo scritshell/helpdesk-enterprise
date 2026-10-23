@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,6 +42,9 @@ class AuthSecurityIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void validCredentialsReturnABearerToken() throws Exception {
@@ -118,5 +123,43 @@ class AuthSecurityIntegrationTest {
                 .header(HttpHeaders.ORIGIN, "https://untrusted.example")
                 .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void technicianDirectoryRequiresRoleAndReturnsTechnicians() throws Exception {
+        String technicianEmail = "directory-tech-" + UUID.randomUUID() + "@example.test";
+        String userEmail = "directory-user-" + UUID.randomUUID() + "@example.test";
+        String password = "Directory-Pass-123!";
+        Role technicianRole = roleRepository.findByName(RoleName.TECHNICIAN).orElseThrow();
+        Role userRole = roleRepository.findByName(RoleName.USER).orElseThrow();
+        UserAccount technician = new UserAccount(technicianEmail, passwordEncoder.encode(password), "Directory", "Technician");
+        technician.addRole(technicianRole);
+        UserAccount user = new UserAccount(userEmail, passwordEncoder.encode(password), "Directory", "User");
+        user.addRole(userRole);
+        userRepository.saveAndFlush(technician);
+        userRepository.saveAndFlush(user);
+        try {
+            String technicianToken = loginAndReadToken(technicianEmail, password);
+            mockMvc.perform(get("/api/users/technicians").header(HttpHeaders.AUTHORIZATION, "Bearer " + technicianToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.email == '%s')]".formatted(technicianEmail)).exists());
+
+            String userToken = loginAndReadToken(userEmail, password);
+            mockMvc.perform(get("/api/users/technicians").header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+        } finally {
+            userRepository.delete(user);
+            userRepository.delete(technician);
+        }
+    }
+
+    private String loginAndReadToken(String email, String password) throws Exception {
+        String content = mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        JsonNode response = objectMapper.readTree(content);
+        return response.get("token").asText();
     }
 }

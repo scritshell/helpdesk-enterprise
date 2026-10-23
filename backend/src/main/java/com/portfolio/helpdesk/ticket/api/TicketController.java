@@ -47,6 +47,11 @@ public class TicketController {
         return ticketService.list(authentication);
     }
 
+    @GetMapping("/queue")
+    public List<TicketResponse> queue(Authentication authentication) {
+        return ticketService.queue(authentication);
+    }
+
     @GetMapping("/{id}")
     public TicketResponse get(@PathVariable Long id, Authentication authentication) {
         return ticketService.get(id, authentication);
@@ -65,6 +70,11 @@ public class TicketController {
     @PatchMapping("/{id}/assignment")
     public TicketResponse assign(@PathVariable Long id, @Valid @RequestBody AssignTicketRequest request, Authentication authentication) {
         return ticketService.assign(id, request, authentication);
+    }
+
+    @PostMapping("/{id}/claim")
+    public TicketResponse claim(@PathVariable Long id, Authentication authentication) {
+        return ticketService.claim(id, authentication);
     }
 
     @PostMapping("/{id}/comments")
