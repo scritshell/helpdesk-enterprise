@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +54,7 @@ class TicketServiceTest {
         reporter = user("reporter@test.local", RoleName.USER);
         otherUser = user("other@test.local", RoleName.USER);
         ticket = new Ticket("Problema", "Descripción", new Category("Software", "Aplicaciones"), reporter);
-        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        lenient().when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticket));
     }
 
     @Test
@@ -86,6 +89,83 @@ class TicketServiceTest {
             () -> service.changeStatus(1L, new ChangeStatusRequest(TicketStatus.RESOLVED), authentication));
 
         assertEquals(403, exception.getStatusCode().value());
+    }
+
+    @Test
+    void technicianCanClaimAnUnassignedTicket() {
+        UserAccount technician = user("technician@test.local", RoleName.TECHNICIAN);
+        when(authentication.getName()).thenReturn("technician@test.local");
+        when(userRepository.findByEmailIgnoreCase("technician@test.local")).thenReturn(Optional.of(technician));
+
+        service.claim(1L, authentication);
+
+        assertEquals(technician, ticket.getTechnician());
+        verify(historyRepository).save(any());
+    }
+
+    @Test
+    void technicianCannotAssignAnotherTechnician() {
+        UserAccount technician = user("technician@test.local", RoleName.TECHNICIAN);
+        when(authentication.getName()).thenReturn("technician@test.local");
+        when(userRepository.findByEmailIgnoreCase("technician@test.local")).thenReturn(Optional.of(technician));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> service.assign(1L, new com.portfolio.helpdesk.ticket.api.TicketDtos.AssignTicketRequest(7L), authentication));
+
+        assertEquals(403, exception.getStatusCode().value());
+        verify(userRepository, never()).findById(7L);
+    }
+
+    @Test
+    void userCannotReadTheTechnicianQueue() {
+        when(authentication.getName()).thenReturn("reporter@test.local");
+        when(userRepository.findByEmailIgnoreCase("reporter@test.local")).thenReturn(Optional.of(reporter));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> service.queue(authentication));
+
+        assertEquals(403, exception.getStatusCode().value());
+        verify(ticketRepository, never()).findByTechnicianIsNullOrderByCreatedAtAsc();
+    }
+
+    @Test
+    void technicianCanReadOnlyUnassignedTicketsFromQueue() {
+        UserAccount technician = user("technician@test.local", RoleName.TECHNICIAN);
+        when(authentication.getName()).thenReturn("technician@test.local");
+        when(userRepository.findByEmailIgnoreCase("technician@test.local")).thenReturn(Optional.of(technician));
+        when(ticketRepository.findByTechnicianIsNullOrderByCreatedAtAsc()).thenReturn(List.of(ticket));
+
+        assertEquals(1, service.queue(authentication).size());
+        verify(ticketRepository).findByTechnicianIsNullOrderByCreatedAtAsc();
+    }
+
+    @Test
+    void assignedTicketCannotBeClaimedTwice() {
+        UserAccount technician = user("technician@test.local", RoleName.TECHNICIAN);
+        UserAccount otherTechnician = user("other-tech@test.local", RoleName.TECHNICIAN);
+        ticket.assignTo(otherTechnician);
+        when(authentication.getName()).thenReturn("technician@test.local");
+        when(userRepository.findByEmailIgnoreCase("technician@test.local")).thenReturn(Optional.of(technician));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> service.claim(1L, authentication));
+
+        assertEquals(409, exception.getStatusCode().value());
+    }
+
+    @Test
+    void assignedTechnicianCanCloseAResolvedTicket() {
+        UserAccount technician = user("technician@test.local", RoleName.TECHNICIAN);
+        ticket.assignTo(technician);
+        ticket.changeStatus(TicketStatus.IN_PROGRESS);
+        ticket.changeStatus(TicketStatus.RESOLVED);
+        when(authentication.getName()).thenReturn("technician@test.local");
+        when(userRepository.findByEmailIgnoreCase("technician@test.local")).thenReturn(Optional.of(technician));
+
+        service.changeStatus(1L, new ChangeStatusRequest(TicketStatus.CLOSED), authentication);
+
+        assertEquals(TicketStatus.CLOSED, ticket.getStatus());
+        verify(historyRepository).save(any());
     }
 
     private UserAccount user(String email, RoleName roleName) {

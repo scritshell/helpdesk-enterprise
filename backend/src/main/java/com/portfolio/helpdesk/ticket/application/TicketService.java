@@ -76,6 +76,15 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
+    public List<TicketResponse> queue(Authentication authentication) {
+        UserAccount user = currentUser(authentication);
+        if (!hasRole(user, RoleName.TECHNICIAN) && !hasRole(user, RoleName.ADMIN)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes consultar la cola de trabajo");
+        }
+        return ticketRepository.findByTechnicianIsNullOrderByCreatedAtAsc().stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
     public TicketResponse get(Long id, Authentication authentication) {
         Ticket ticket = find(id);
         assertCanRead(ticket, currentUser(authentication));
@@ -112,7 +121,7 @@ public class TicketService {
     public TicketResponse assign(Long id, AssignTicketRequest request, Authentication authentication) {
         Ticket ticket = find(id);
         UserAccount actor = currentUser(authentication);
-        if (!hasRole(actor, RoleName.ADMIN) && !hasRole(actor, RoleName.TECHNICIAN)) {
+        if (!hasRole(actor, RoleName.ADMIN)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes asignar incidencias");
         }
         UserAccount technician = userRepository.findById(request.technicianId())
@@ -122,6 +131,22 @@ public class TicketService {
         ticket.assignTo(technician);
         historyRepository.save(new TicketHistoryEntry(ticket, actor, "TECHNICIAN_ASSIGNED",
             previousId == null ? null : previousId.toString(), technician.getId().toString()));
+        return toResponse(ticket);
+    }
+
+    @Transactional
+    public TicketResponse claim(Long id, Authentication authentication) {
+        Ticket ticket = find(id);
+        UserAccount actor = currentUser(authentication);
+        if (!hasRole(actor, RoleName.TECHNICIAN)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo un técnico puede reclamar incidencias");
+        }
+        if (ticket.getTechnician() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La incidencia ya está asignada a un técnico");
+        }
+        ticket.assignTo(actor);
+        String actorReference = actor.getId() == null ? actor.getEmail() : actor.getId().toString();
+        historyRepository.save(new TicketHistoryEntry(ticket, actor, "TECHNICIAN_CLAIMED", null, actorReference));
         return toResponse(ticket);
     }
 

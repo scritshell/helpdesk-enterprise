@@ -9,4 +9,5 @@ import com.portfolio.helpdesk.ticket.domain.Ticket;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByReporterIdOrderByCreatedAtDesc(Long reporterId);
     List<Ticket> findByTechnicianIdOrderByCreatedAtDesc(Long technicianId);
+    List<Ticket> findByTechnicianIsNullOrderByCreatedAtAsc();
 }
