@@ -60,7 +60,7 @@ Para producción debe sustituirse por una configuración de entorno o por un rev
 - Contraseña incorrecta: `401`.
 - Preflight CORS desde `http://localhost:4200`: permitido.
 - Preflight CORS desde un origen externo: rechazado.
-- Las comprobaciones funcionales de la entrega inicial se deben volver a ejecutar después del endurecimiento. Consulta `phase5-security-hardening.md` para la batería actual de pruebas y sus límites.
+- Las comprobaciones funcionales complementarias y sus límites están documentados en `phase5-security-hardening.md`.
 
 
 ## Controles de autenticación añadidos

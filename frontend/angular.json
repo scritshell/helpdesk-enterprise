@@ -24,7 +24,13 @@
               "sourceMap": true
             },
             "production": {
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "sourceMap": false
             }
           },
