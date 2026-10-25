@@ -75,6 +75,15 @@ public class UserAccount implements UserDetails {
         roles.add(role);
     }
 
+    public void replaceRoles(Set<Role> newRoles) {
+        roles.clear();
+        roles.addAll(newRoles);
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public Long getId() {
         return id;
     }
@@ -89,6 +98,10 @@ public class UserAccount implements UserDetails {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
     public Set<Role> getRoles() {

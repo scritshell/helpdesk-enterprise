@@ -1,0 +1,23 @@
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
+import { AdminRole, AdminUser } from '../../core/admin/admin.models';
+import { AdminService } from '../../core/admin/admin.service';
+import { apiErrorMessage } from '../../core/http/http-error';
+
+@Component({ selector: 'app-admin-users', standalone: true, imports: [CommonModule, FormsModule], template: `
+  <section class="page-heading"><div><p class="eyebrow">Administración</p><h1>Usuarios y roles</h1><p class="text-muted mb-0">Gestiona acceso y estado de las cuentas sin exponer información sensible.</p></div></section>
+  <div *ngIf="loading" class="panel skeleton-table" aria-busy="true"><div class="skeleton skeleton-line" *ngFor="let item of [1,2,3,4]"></div></div>
+  <div *ngIf="error && !loading" class="state-card error-state" role="alert"><h2>No se han podido cargar los usuarios</h2><p>{{ error }}</p><button class="btn btn-outline-primary" (click)="load()">Reintentar</button></div>
+  <section *ngIf="!loading && !error" class="panel"><div class="filters admin-filter"><div><label for="user-search">Buscar</label><input id="user-search" class="form-control" [(ngModel)]="search" placeholder="Nombre o correo" /></div></div><div *ngIf="feedback" class="alert" [class.alert-danger]="feedbackError" [class.alert-success]="!feedbackError" role="status">{{ feedback }}</div><div *ngIf="filtered.length === 0" class="empty-state"><h2>No hay usuarios</h2><p class="text-muted">No hay cuentas que coincidan con la búsqueda.</p></div><div *ngIf="filtered.length > 0" class="table-wrap"><table class="table align-middle mb-0"><thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Alta</th><th></th></tr></thead><tbody><tr *ngFor="let user of filtered"><td><strong>{{ user.firstName }} {{ user.lastName }}</strong></td><td>{{ user.email }}</td><td><select class="form-select form-select-sm" [(ngModel)]="roleDraft[user.id]" [name]="'role-' + user.id"><option *ngFor="let role of roles" [value]="role">{{ roleLabel(role) }}</option></select></td><td><label class="form-check form-switch"><input class="form-check-input" type="checkbox" [(ngModel)]="enabledDraft[user.id]" [name]="'enabled-' + user.id" /><span>{{ enabledDraft[user.id] ? 'Activa' : 'Inactiva' }}</span></label></td><td class="text-muted">{{ user.createdAt | date:'dd/MM/yyyy' }}</td><td><button class="btn btn-sm btn-primary" [disabled]="workingId === user.id" (click)="save(user)">{{ workingId === user.id ? 'Guardando…' : 'Guardar' }}</button></td></tr></tbody></table></div></section>
+` })
+export class AdminUsersComponent {
+  private readonly service = inject(AdminService); private readonly cdr = inject(ChangeDetectorRef);
+  users: AdminUser[] = []; roleDraft: Record<number, AdminRole> = {}; enabledDraft: Record<number, boolean> = {}; roles: AdminRole[] = ['USER', 'TECHNICIAN', 'ADMIN']; search = ''; loading = true; error = ''; feedback = ''; feedbackError = false; workingId: number | null = null;
+  constructor() { this.load(); }
+  get filtered(): AdminUser[] { const query = this.search.trim().toLocaleLowerCase(); return this.users.filter(user => `${user.firstName} ${user.lastName} ${user.email}`.toLocaleLowerCase().includes(query)); }
+  load(): void { this.loading = true; this.error = ''; this.service.users().pipe(finalize(() => { this.loading = false; this.cdr.markForCheck(); })).subscribe({ next: users => { this.users = users; users.forEach(user => { this.roleDraft[user.id] = user.roles[0] ?? 'USER'; this.enabledDraft[user.id] = user.enabled; }); }, error: error => this.error = apiErrorMessage(error, 'No se han podido cargar los usuarios.') }); }
+  save(user: AdminUser): void { const nextRole = this.roleDraft[user.id]; const nextEnabled = this.enabledDraft[user.id]; if (!nextRole) return; if (!window.confirm(`¿Guardar los cambios de ${user.firstName} ${user.lastName}?`)) return; this.workingId = user.id; this.feedback = ''; this.service.updateUser(user.id, { roles: [nextRole], enabled: nextEnabled }).pipe(finalize(() => { this.workingId = null; this.cdr.markForCheck(); })).subscribe({ next: updated => { this.users = this.users.map(item => item.id === updated.id ? updated : item); this.feedback = 'Los cambios se han guardado.'; this.feedbackError = false; }, error: error => { this.feedback = apiErrorMessage(error, 'No se han podido guardar los cambios.'); this.feedbackError = true; } }); }
+  roleLabel(role: AdminRole): string { return role === 'ADMIN' ? 'Administrador' : role === 'TECHNICIAN' ? 'Técnico' : 'Usuario'; }
+}

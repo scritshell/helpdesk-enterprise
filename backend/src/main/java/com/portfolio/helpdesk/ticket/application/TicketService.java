@@ -86,9 +86,15 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     public TicketResponse get(Long id, Authentication authentication) {
+        Ticket ticket = authorizedTicket(id, authentication);
+        return toResponse(ticket);
+    }
+
+    @Transactional(readOnly = true)
+    public Ticket authorizedTicket(Long id, Authentication authentication) {
         Ticket ticket = find(id);
         assertCanRead(ticket, currentUser(authentication));
-        return toResponse(ticket);
+        return ticket;
     }
 
     @Transactional

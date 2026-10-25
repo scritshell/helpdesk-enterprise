@@ -10,4 +10,6 @@ import com.portfolio.helpdesk.category.domain.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findByActiveTrueOrderByNameAsc();
     Optional<Category> findByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

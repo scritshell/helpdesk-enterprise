@@ -13,6 +13,10 @@ spring:
     enabled: true
     locations: classpath:db/migration
     validate-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: ${ATTACHMENTS_MAX_SIZE:10MB}
+      max-request-size: ${ATTACHMENTS_MAX_REQUEST_SIZE:11MB}
 app:
   cors:
     allowed-origin: ${APP_CORS_ALLOWED_ORIGIN:http://localhost:4200}
@@ -21,6 +25,9 @@ app:
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:30}
   seed:
     enabled: ${APP_SEED_ENABLED:false}
+  attachments:
+    storage-path: ${ATTACHMENTS_STORAGE_PATH:./data/attachments}
+    max-size-bytes: ${ATTACHMENTS_MAX_SIZE_BYTES:10485760}
 management:
   endpoints:
     web:
