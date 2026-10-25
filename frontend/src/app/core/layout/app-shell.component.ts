@@ -14,6 +14,9 @@ import { AuthService } from '../auth/auth.service';
           <a routerLink="/app/dashboard" routerLinkActive="active" class="nav-link"><span aria-hidden="true">⌂</span><span *ngIf="!collapsed">Panel</span></a>
           <a routerLink="/app/tickets" routerLinkActive="active" class="nav-link"><span aria-hidden="true">▤</span><span *ngIf="!collapsed">{{ ticketsLabel }}</span></a>
           <a *ngIf="isTechnician" routerLink="/app/technician/queue" routerLinkActive="active" class="nav-link"><span aria-hidden="true">◈</span><span *ngIf="!collapsed">Cola de trabajo</span></a>
+          <a *ngIf="isAdmin" routerLink="/app/admin/users" routerLinkActive="active" class="nav-link"><span aria-hidden="true">♙</span><span *ngIf="!collapsed">Usuarios y roles</span></a>
+          <a *ngIf="isAdmin" routerLink="/app/admin/categories" routerLinkActive="active" class="nav-link"><span aria-hidden="true">▦</span><span *ngIf="!collapsed">Categorías</span></a>
+          <a *ngIf="isAdmin" routerLink="/app/admin/statistics" routerLinkActive="active" class="nav-link"><span aria-hidden="true">▥</span><span *ngIf="!collapsed">Estadísticas</span></a>
           <a *ngIf="canCreate" routerLink="/app/tickets/new" routerLinkActive="active" class="nav-link"><span aria-hidden="true">＋</span><span *ngIf="!collapsed">Nueva incidencia</span></a>
         </nav>
         <div class="sidebar-footer" *ngIf="!collapsed"><span class="small text-muted">Sesión activa</span><span class="small">{{ userName }}</span></div>
@@ -38,6 +41,7 @@ export class AppShellComponent {
   get roleLabel(): string { return this.auth.hasRole('ADMIN') ? 'ADMINISTRACIÓN' : this.auth.hasRole('TECHNICIAN') ? 'SOPORTE TÉCNICO' : 'ESPACIO DE USUARIO'; }
   get ticketsLabel(): string { return this.auth.hasRole('ADMIN') ? 'Todas las incidencias' : this.auth.hasRole('TECHNICIAN') ? 'Asignadas a mí' : 'Mis incidencias'; }
   get isTechnician(): boolean { return this.auth.hasRole('TECHNICIAN'); }
+  get isAdmin(): boolean { return this.auth.hasRole('ADMIN'); }
   get pageTitle(): string { return this.router.url.includes('/tickets') ? 'Incidencias' : 'Panel principal'; }
   toggleSidebar(): void { this.collapsed = !this.collapsed; }
   logout(): void { this.auth.logout(); void this.router.navigate(['/login']); }

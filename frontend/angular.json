@@ -16,7 +16,7 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [],
-            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"]
+            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css", "src/admin.css"]
           },
           "configurations": {
             "development": {

@@ -11,6 +11,13 @@ public final class CategoryDtos {
         @Size(max = 500) String description
     ) {}
 
+    public record UpdateCategoryRequest(
+        @NotBlank @Size(max = 100) String name,
+        @Size(max = 500) String description
+    ) {}
+
+    public record ChangeCategoryStatusRequest(@jakarta.validation.constraints.NotNull Boolean active) {}
+
     public record CategoryResponse(
         Long id,
         String name,
