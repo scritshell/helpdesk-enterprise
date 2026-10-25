@@ -62,4 +62,4 @@ helpdesk-enterprise/
 
 Consulta [docs/architecture.md](docs/architecture.md) para la explicación de las decisiones, [docs/phase2-auth.md](docs/phase2-auth.md) para usuarios, roles, JWT y Flyway, [docs/phase3-tickets.md](docs/phase3-tickets.md) para categorías y tickets, [docs/phase4-comments-audit-tests.md](docs/phase4-comments-audit-tests.md) para comentarios, auditoría y pruebas, y [docs/phase5-frontend-auth.md](docs/phase5-frontend-auth.md) para el login Angular y la gestión de sesión, además de [docs/phase5-security-hardening.md](docs/phase5-security-hardening.md) para los controles de seguridad de autenticación.
 
-La administración de usuarios, categorías, estadísticas y adjuntos está documentada en [docs/phase7-admin-enterprise.md](docs/phase7-admin-enterprise.md).
+La administración de usuarios, categorías, estadísticas y adjuntos está documentada en [docs/phase7-admin-enterprise.md](docs/phase7-admin-enterprise.md). La auditoría de calidad, seguridad y preparación para portfolio se recoge en [docs/phase8-release-hardening.md](docs/phase8-release-hardening.md).

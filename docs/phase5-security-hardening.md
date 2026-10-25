@@ -41,4 +41,4 @@ npm run build
 npm audit
 ```
 
-El resultado debe verificarse en el entorno de destino; no se afirma aquí que estas pruebas se hayan ejecutado en este paquete de trabajo hasta que se completen en el entorno disponible.
+La suite debe ejecutarse con PostgreSQL disponible para validar el contexto completo de Spring, JPA y Flyway.

@@ -35,9 +35,9 @@ La prueba de Angular verifica la creación del componente raíz y la presencia d
 
 ## Docker Compose
 
-No se pudo ejecutar `sudo docker compose up -d --build` en este sandbox porque el binario Docker no está instalado (`sudo: docker: command not found`). El `docker-compose.yml` no se modificó en esta fase y GitHub Actions mantiene PostgreSQL como servicio para CI.
+La validación de Docker requiere una instalación local de Docker Engine y Compose. El workflow de GitHub Actions mantiene PostgreSQL como servicio para CI.
 
-En el equipo de desarrollo se debe ejecutar, sin borrar volúmenes:
+Para validar el entorno Docker sin borrar volúmenes:
 
 ```bash
 sudo docker compose up -d --build

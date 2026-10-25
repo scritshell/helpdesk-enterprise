@@ -27,7 +27,7 @@ La cola técnica usa dos casos de uso separados:
 
 Los tickets `RESOLVED` muestran «Cerrar incidencia» y utilizan la transición de dominio existente hacia `CLOSED`. El backend continúa rechazando transiciones inválidas con `409` y operaciones no autorizadas con `403`.
 
-No se ha añadido una cola de tickets sin asignar porque el backend no define ese caso de uso. Tampoco se han simulado estadísticas agregadas, administración de usuarios, adjuntos ni desasignación: no existen todavía en el contrato actual.
+Las funcionalidades empresariales posteriores —administración, estadísticas y adjuntos— están documentadas en `phase7-admin-enterprise.md`.
 
 ## Validación ejecutada
 

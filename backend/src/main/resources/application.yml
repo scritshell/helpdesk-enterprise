@@ -35,3 +35,7 @@ management:
         include: health,info
 server:
   port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
